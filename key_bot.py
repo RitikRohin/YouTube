@@ -3,10 +3,10 @@ import json
 import os
 from pyrogram import Client, filters
 
-# Replace these with your real values
-API_ID = 123456
-API_HASH = "your-api-hash"
-BOT_TOKEN = "your-bot-token"
+# ✅ Load environment variables
+API_ID = int(os.environ.get("API_ID"))
+API_HASH = os.environ.get("API_HASH")
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
 KEY_FILE = "apikeys.json"
 
