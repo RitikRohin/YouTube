@@ -64,4 +64,23 @@ async def revoke(client, message):
     else:
         await message.reply("❌ You don’t have a key to revoke.")
 
+
+ADMIN_ID = 123456789  # 🛡️ Change this to your Telegram user ID
+
+@app.on_message(filters.command("allow") & filters.user(ADMIN_ID))
+async def allow_user(client, message):
+    if len(message.command) < 2:
+        await message.reply("Usage: /allow <user_id>")
+        return
+
+    user_id = message.command[1]
+    allowed = load_allowed()
+
+    if user_id in allowed:
+        await message.reply("✅ User already allowed.")
+    else:
+        allowed.append(user_id)
+        save_allowed(allowed)
+        await message.reply(f"✅ User {user_id} is now allowed.")
+
 app.run()
