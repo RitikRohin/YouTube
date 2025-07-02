@@ -83,4 +83,3 @@ async def allow_user(client, message):
         save_allowed(allowed)
         await message.reply(f"✅ User {user_id} is now allowed.")
 
-app.run()
