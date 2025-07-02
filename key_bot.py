@@ -65,7 +65,7 @@ async def revoke(client, message):
         await message.reply("❌ You don’t have a key to revoke.")
 
 
-ADMIN_ID = 123456789  # 🛡️ Change this to your Telegram user ID
+ADMIN_ID = 7666870729  # 🛡️ Change this to your Telegram user ID
 
 @app.on_message(filters.command("allow") & filters.user(ADMIN_ID))
 async def allow_user(client, message):
