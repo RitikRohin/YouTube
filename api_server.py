@@ -1,55 +1,75 @@
-from fastapi import FastAPI, Query
-from pydantic import BaseModel
-import yt_dlp
+# File: key_bot.py
+
+import uuid
 import json
 import os
+from pyrogram import Client, filters
 
-app = FastAPI()
+# 🛠️ Replace with your values from https://my.telegram.org
+API_ID = 123456
+API_HASH = "your_api_hash"
+BOT_TOKEN = "your_bot_token"
 
 KEY_FILE = "apikeys.json"
 
-class YouTubeData(BaseModel):
-    title: str
-    thumbnail: str
-    duration: str
-    direct_url: str
+# 📁 If file doesn't exist, create empty
+if not os.path.exists(KEY_FILE):
+    with open(KEY_FILE, "w") as f:
+        json.dump({}, f)
 
+# 🔁 Load and Save Key Functions
 def load_keys():
-    if not os.path.exists(KEY_FILE):
-        return []
     with open(KEY_FILE, "r") as f:
-        return json.load(f).values()
+        return json.load(f)
 
-def extract_info(url: str, format_code: str):
-    ydl_opts = {
-        "quiet": True,
-        "skip_download": True,
-        "simulate": True,
-        "forcejson": True,
-        "format": format_code,
-    }
+def save_keys(data):
+    with open(KEY_FILE, "w") as f:
+        json.dump(data, f, indent=2)
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=False)
-        return {
-            "title": info.get("title"),
-            "thumbnail": info.get("thumbnail"),
-            "duration": f"{int(info['duration']//60)}:{int(info['duration']%60):02}",
-            "direct_url": info.get("url"),
-        }
+# 🚀 Bot Client
+app = Client("key-bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-@app.get("/")
-def home():
-    return {"message": "✅ YouTube API Server is Live!"}
+# 👋 Welcome Message
+@app.on_message(filters.command("start"))
+async def start(client, message):
+    await message.reply("👋 Welcome!\nUse /getkey to generate your YouTube API Key.")
 
-@app.get("/video", response_model=YouTubeData)
-def get_video(url: str = Query(...), apikey: str = Query(...)):
-    if apikey not in load_keys():
-        return {"error": "❌ Invalid API Key"}
-    return extract_info(url, "18")  # mp4 360p
+# 🔑 Generate or Get Key
+@app.on_message(filters.command("getkey"))
+async def getkey(client, message):
+    user_id = str(message.from_user.id)
+    keys = load_keys()
 
-@app.get("/audio", response_model=YouTubeData)
-def get_audio(url: str = Query(...), apikey: str = Query(...)):
-    if apikey not in load_keys():
-        return {"error": "❌ Invalid API Key"}
-    return extract_info(url, "140")  # m4a audio
+    if user_id in keys:
+        await message.reply(f"🔑 Your API Key:\n`{keys[user_id]}`")
+    else:
+        new_key = uuid.uuid4().hex
+        keys[user_id] = new_key
+        save_keys(keys)
+        await message.reply(f"✅ API Key Generated:\n`{new_key}`")
+
+# 👁️ View Your Key
+@app.on_message(filters.command("mykey"))
+async def mykey(client, message):
+    user_id = str(message.from_user.id)
+    keys = load_keys()
+
+    if user_id in keys:
+        await message.reply(f"🔑 Your API Key:\n`{keys[user_id]}`")
+    else:
+        await message.reply("❌ You don’t have a key yet. Use /getkey")
+
+# 🗑️ Revoke Key
+@app.on_message(filters.command("revoke"))
+async def revoke(client, message):
+    user_id = str(message.from_user.id)
+    keys = load_keys()
+
+    if user_id in keys:
+        del keys[user_id]
+        save_keys(keys)
+        await message.reply("🗑️ Your API Key has been revoked.")
+    else:
+        await message.reply("❌ You don’t have a key to revoke.")
+print("run")
+app.run()
