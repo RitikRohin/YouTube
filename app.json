@@ -1,10 +1,9 @@
 {
   "name": "YouTube API + Telegram Key Generator",
   "description": "A FastAPI-based YouTube API secured with API keys generated from Telegram bot.",
-  "repository": "https://github.com/RitikRohin/Youtube-API-Key-Generator",
+  "repository": "https://github.com/RitikRohin/YouTube",
   "logo": "https://cdn-icons-png.flaticon.com/512/1384/1384060.png",
   "keywords": ["fastapi", "yt-dlp", "telegram bot", "api key", "heroku"],
-  "stack": "container",
   "env": {
     "API_ID": {
       "description": "Your Telegram API ID (from https://my.telegram.org)",
